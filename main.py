@@ -22,17 +22,19 @@ from PIL import Image
 # #使用json解析
 #json = response.json()
 #print(json)
-finance_path="reference/finance"
+pdf_path=["reference/finance","reference/insurance"]
 def pdf_to_text(file_path):
     # Open the PDF file
     doc = fitz.open(file_path)
 
     extracted_text = ''
-
+    zoom_x = 2.0  
+    zoom_y = 2.0  
+    mat = fitz.Matrix(zoom_x, zoom_y)  
     # Loop through each page in the PDF
     for page_num in range(doc.page_count):
         page = doc.load_page(page_num)
-        pix = page.get_pixmap()  # Convert page to an image
+        pix = page.get_pixmap(matrix=mat)  # Convert page to an image
 
         # Convert pixmap to PIL Image for OCR
         img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
@@ -40,9 +42,21 @@ def pdf_to_text(file_path):
         extracted_text += pytesseract.image_to_string(img,lang='chi_tra+eng')
 
     # Print or save the extracted text
-    print(extracted_text)
+    
     return extracted_text
 # Example usage
-file_path = os.path.join(finance_path,"1.pdf")
-pdf_text = pdf_to_text(file_path)
-print(len(pdf_text))
+for path in pdf_path:
+    file_list=os.listdir(path)
+    file_list=sorted(file_list)
+    for file in file_list:
+        id,ext= os.path.splitext(file)
+        file_path = os.path.join(path,file)
+        pdf_text = pdf_to_text(file_path)
+        text_path="reference/finance_text"
+        if(not os.path.exists(text_path)):
+            os.mkdir(text_path)
+        with open(os.path.join(text_path,f"{id}.txt"),"w") as w_f:
+            w_f.write(pdf_text)
+            w_f.close()
+    
+        

@@ -46,8 +46,8 @@ def pdf_to_text(file_path):
     return extracted_text
 # Example usage
 for path in pdf_path:
-    file_list=os.listdir(path)
-    file_list=sorted(file_list)
+    file_list=[f for f in os.listdir(path) if f.endswith('.pdf')]
+    file_list=sorted(file_list,key=lambda x:int(x.split(".")[0]))
     for file in file_list:
         id,ext= os.path.splitext(file)
         file_path = os.path.join(path,file)

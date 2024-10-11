@@ -1,0 +1,202 @@
+截至本合併財務報告發布日止,本公司仍持續評估上述準則、解
+釋之修正及相關適用期間對財務狀況與財務績效之影響,相關影響
+待評估完成時予以揭露。
+四、重大會計政策之彙總說明
+除下列說明外,本合併財務報告所採用之會計政策與 111 年度合
+併財務報告相同。
+(一) 遵循聲明
+本合併財務報告係依照證券發行人財務報告編製準則及經金管
+會認可並發布生效之國際會計準則第34 號「期中財務報導」編製。
+本合併財務報告並未包含整份年度財務報告所規定之所有經金管會
+認可並發布生效 IFRSs 揭露資訊。
+(二) 合併基礎及原則
+1. 合併報告編製原則
+本合併財務報告所採用之合併報告編製基礎及原則與 111
+年度合併財務報告相同。
+2. 列入合併財務報告之子公司
+本合併財務報告編製主體如下:
+
+ 
+
+ 
+
+本公司所持有之所有權權益百分比
+112年     111年     111年
+
+ 
+
+ 
+
+司名稱 子 公 司 名 稱 主 要 業 務 設立及營運地點 _3月31日__12月31日 _3月31日_ 說   A
+TSMC North     AME CHAR San Jose,        100%     100%     100%     =
+America                  他半導體裝。 California,
+點之銷售業 USA
+務
+TSMC Europe BV. 客戶服務及支_ Amsterdam,the 100%     100%     100%     註一
+(TSMC                     RTH               Netherlands
+Europe)
+TSMC Japan     客戶服務及支 Yokohama,      100%     100%     100%     註一
+Limited (TSMC 4 £45               Japan
+Japan )
+TSMC Design     工程支援業務。Yokohama,      100%     100%     100%    註一
+Technology                                         Japan
+Japan, Inc.
+(TSMC JDC)
+TSMC Japan 3DIC_ 工程支援業務 Yokohama,      100%     100%     100%    註一
+R&D Center,                                      Japan
+Ine. (TSMC
+3DIC)
+TSMC Korea     客戶服務及支 Seoul Korea     100%     100%     100%     註一
+Limited (TSMC 援業務
+Korea)
+TSMC Partners,                            + Tortola, British           100%            100%            100%              -
+Ltd. (TSMC                                       Virgin Islands
+Partners )
+
+ 
+
+-12-
+ 
+
+ 
+
+112征            Te            Te
+段資公司名稱 子 公 司 名 稱 主 要 業 務 設立及營運地點 _3月31日。_12月31昌__3月31日_ 說 明
+TSMC Global Ltd一般投資業務Tortola British。 100%            100%            100%              =
+(TSMC                                             Virgin Islands
+Global )
+台積電(中國) 有 積體電路及其 中國上海市        100%      100%      100%       一
+限公司 (台積電         他半導體農
+中國子公司)             點之製造、
+銷售、測試
+與電腦輔助
+ont (bk) A 積體電路及其。中國南京市       100%     100%     100%      一
+限公司 (台積電         OF HR
+南京子公司)               點之製造、
+銷售、測試
+與電腦輔助
+和采鈺科技股份有限 彩色濾光膜產 新竹市           68%,       68%       73%      註二
+BA (Rae             品相關研
+司)                   究、設計~開
+HES
+和售及封裝測
+試
+TSMC Arizona 積體電路及其。Phoenix,        100%     100%     100%     Be
+Corporation              HAR Arizona,
+(TSMC                     轉之製造、 USA
+Arizona)                  銷售與測試
+Japan Advanced 積體電路及其。Kumamoto,       71%     71%     81% AGE
+Semiconductor  @ #4 #R Japan                                                                            回
+Manufacturing, 點之製造、
+Ine. (JASM)     銷售、測試
+與電腦輔助
+VentureTech       新創科技事業Cayman Islands     98%,       98%       98%.      註一
+Alliance Fund IL 之投次
+LP (CVTAFID
+VentureTech     MAAAER Caymanislands 98%     98%     98%    註一
+Alliance Fund            之投資
+MIL LP. (VTAF
+m1)
+Emerging Fund 新創科技事業“Cayman Islands 99.9%    99.9%    99.9%    Bo
+LP. (Emerging 之投次
+Fund )
+TSMC Partners. TSMC          #4 AM ik4a Delaware,       100%     100%,     100%      二
+Development,     關投資業務 | USA.
+Ine. (TSMC
+Development)
+TSMC Technology, + # £4 #4 Delaware,       100%     100%     100%     註一
+Ine. (TSMC                                 USA.
+Technology )
+TSMC Design     工程支援業務Ontario, Canada 100%     100%     100%     註一
+Technology
+Canada Inc.
+(TSMC
+Canada)
+TSMC                    WaferTech, LLC ##t @84 A FL Washington,              100%            100%            100%              -
+Development         (WaferTech )           他半導體農 USA.
+點之製造、
+銷售與測試
+VTAFI        Growth Fund      新創科技事業Cayman Islands     100%      100%      100%      註一
+Limited                      之投資
+(Growth
+Fund)
+
+註一
+
+ee
+
+財務報表未經會計師核閱或查核之非重大子公
+打鈺公司於111年6月辦理增資,增資後台積公
+
+a
+
+司對采鈺公司之持股比例由73%%下降至68%,
+
+此交易並未改變本公司對打鈺公司之控制,故仍採權益交易處理。
+
+註三
+
+投資金額及創造特定數額之就業機會。
+
+- 13-
+
+依據 TSMC Arizona 與 City of Phoenix 簽訂之開發協識, City of Phoenix 承諾於約定之晶
+圖廠興建區域投入各項公共基礎設施約2.05 億美元,
+
+而 TSMC Arizona 需至少達到特定之
+註加: JASM 於 111年4月辦理非優先及非累積特別股及普通股之增資,增次後台積公司對JASM
+之所有權權益百分比由 81%下降至 71%,惟表決權百分比仍維持 81%。上述交易皆未改變
+本公司對 JASM 之控制,故仍採權益交易處理。
+
+(三) 退職後福利
+期中期間之退休金成本係採用前一財務年度結束日依精算決定
+之退休金成本率,以年初至當期期末為基礎計算。
+(四) 所得稅
+所得稅費用係當期所得稅及遞延所得稅之總和。期中所得稅費
+用係以年度為基礎進行評估,以預期年度總盈餘所適用之稅率,就稅
+前利益予以計算。
+五、重大會計判斷、估計及假設不確定性之主要來源
+本合併財務報告所採用之其他重大會計判斷、估計及假設不確定
+性之主要來源與 111 年度合併財務報告相同。
+六、現金及約當現金
+
+ 
+
+ 
+
+112434318 1114124318 111434318
+
+ 
+
+現金及銀行存款                      $1,376,643,700 。 $1,327,884,602。 $1,148,906,061
+BEAR                4,552,665     9,566,430      999,273
+貨幣市場基金                                 2,696,994             1,406,792             1,112,377
+附買回交易         1,265,191   1,133,310      -
+政府公債                                                    74,260               2,451,570                  571,935
+公司債                                                     -               371379
+
+ 
+
+$1.385.232.810  $1,342,814,083  $1,151,589,646
+
+ 
+
+ 
+
+銀行存款包括高度流動性、可隨時轉換成定額現金且價值變動風
+險其小之定期存款。
+七、透過損益按公多價值衡量之金融資產及金融負債
+112434318 1114124318 111434318
+
+ 
+
+金融資產
+強制透過損益按公允價值衡
+量
+遠期外匯合約                    $ 860,326         $ 947,546         $ 758,452
+可轉換公司債                         121,688              122,852                        -
+$982,014        $ 1,070,398        $758,452
+(HARA)
+
+-14-
+

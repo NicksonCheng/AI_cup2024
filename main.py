@@ -52,10 +52,10 @@ for path in pdf_path:
         id,ext= os.path.splitext(file)
         file_path = os.path.join(path,file)
         pdf_text = pdf_to_text(file_path)
-        text_path="reference/finance_text"
-        if(not os.path.exists(text_path)):
-            os.mkdir(text_path)
-        with open(os.path.join(text_path,f"{id}.txt"),"w") as w_f:
+        new_path=f"{path}_txt"
+        if(not os.path.exists(new_path)):
+            os.mkdir(new_path)
+        with open(os.path.join(new_path,f"{id}.txt"),"w") as w_f:
             w_f.write(pdf_text)
             w_f.close()
     

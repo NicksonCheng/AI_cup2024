@@ -51,5 +51,6 @@ def read_pdf(pdf_loc, page_infos: list = None):
             # Convert pixmap to PIL Image for OCR
             img = Image.frombytes("RGB", [pix.width, pix.height], pix.samples)
             # Extract text using OCR
-            pdf_text += pytesseract.image_to_string(img,lang='chi_tra+eng')
+            scanned_text = pytesseract.image_to_string(img,lang='chi_tra+eng')
+            pdf_text+=scanned_text + "\n"
     return pdf_text  # 返回萃取出的文本

@@ -11,7 +11,7 @@ from langchain.text_splitter import  RecursiveCharacterTextSplitter
 from langchain_community.vectorstores import Chroma
 from langchain_community.chat_models import ChatOpenAI
 from langchain.chains import ConversationalRetrievalChain
-
+from langchain.chains import VectorDBQA
 
 class ScannedPDFLoader:
     def __init__(self, file_path):
@@ -29,7 +29,6 @@ class ScannedPDFLoader:
 
     def load_and_split(self, splitter):
         text = self.load()
-        print(len(text))
         return splitter.split_text(text)
 def is_scanned_pdf(file_path):
     with pdfplumber.open(file_path) as pdf:
@@ -50,7 +49,7 @@ with open(os.path.join(question_path,"ground_truths_example.json"), 'rb') as f:
     gt_ref = json.load(f)
 
 
-file_path="../reference/finance/489.pdf"
+file_path="../reference/finance/488.pdf"
 
 if (is_scanned_pdf(file_path)):
     loader=ScannedPDFLoader(file_path)
@@ -58,11 +57,11 @@ else:
     loader = PyPDFLoader(file_path)
 splitter = RecursiveCharacterTextSplitter(chunk_size=500, chunk_overlap=0) 
 texts = loader.load_and_split(splitter)
-print(len(texts))
+print(texts)
 # create local database
 embeddings = OpenAIEmbeddings()
-vectorstore = Chroma.from_documents(texts, embeddings)
-
+db = Chroma.from_documents(texts, embeddings)
+qa = VectorDBQA.from_chain_type(llm=ChatOpenAI(), chain_type="stuff", vectorstore=db, k=1)
 
 # # conversation chain
 # qa = ConversationalRetrievalChain.from_llm(ChatOpenAI(temperature=0), vectorstore.as_retriever())

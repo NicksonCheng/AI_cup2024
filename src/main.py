@@ -10,6 +10,7 @@ from torch.utils.data import random_split
 from torch.nn.utils.rnn import pad_sequence
 from sklearn.metrics import accuracy_score
 from tqdm import tqdm
+os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
 # Function to calculate Precision@1
 def precision_at_1(pred):
     # Get the highest-scoring prediction for each query
@@ -44,13 +45,23 @@ def preprocess_sample(q_data,gt_data,category_data):
                 #     self.labels.append(lb)
             else:
                 ans=category_data[cgy][str(s)]
-                samples.append((main_question,ans,cgy))
-                labels.append(lb)
+                ans_len=len(ans)
+                pivot=2000
+                if(ans_len>pivot):
+                    parts=ans_len  // pivot 
+                    split_ans=[ans[i * pivot:(i+1) * pivot] for i in range(parts)]
+                    split_ans.append(ans[parts * pivot:])
+                    for sub_ans in split_ans:
+                        samples.append((main_question,sub_ans,cgy))
+                        labels.append(lb)
+                else:
+                    samples.append((main_question,ans,cgy))
+                    labels.append(lb)
     return samples,labels
 
 
 class ChunkedTrainer(Trainer):
-    def compute_loss(self, model, inputs,num_items_in_batch):
+    def compute_loss(self, model, inputs, return_outputs=True):
         # Extract input_ids, attention_mask, and labels
         input_ids = inputs['input_ids']  # Shape: (chunk, batch, length)
         attention_mask = inputs['attention_mask']
@@ -121,7 +132,8 @@ def custom_collate_fn(batch):
     padding_input_ids=pad_sequence(input_ids,batch_first=False,padding_value=0)
     padding_attention_mask=pad_sequence(attention_mask,batch_first=False,padding_value=0)
     labels = torch.tensor([item['labels'] for item in batch])
-    print(padding_input_ids.shape,labels.shape)
+    #extend_labels=labels.repeat(padding_input_ids.shape[0],1)
+    #print(padding_input_ids.shape,labels.shape)
     return {
         "input_ids": padding_input_ids,
         "attention_mask": padding_attention_mask,
@@ -205,17 +217,29 @@ if __name__ == "__main__":
     with torch.no_grad():
         test_preds=[]
         test_labels=[]
-        for test_batch in tqdm(dataloader):
+        for test_batch in tqdm(test_loader):
             input_ids=test_batch["input_ids"]
+            input_ids=input_ids.view(-1,input_ids.size(-1))
             attention_mask=test_batch["attention_mask"]
-            labels=test_batch["label"]
-            outputs=model(input_ids=input_ids,attention_mask=attention_mask,labels=labels)
+            attention_mask=attention_mask.view(-1,attention_mask.size(-1))
+
+            new_batch_size = input_ids.size(0)  # This is chunk * batch
+            labels=test_batch["labels"]
+            labels = labels.repeat(new_batch_size // labels.size(0))
+            outputs=model(input_ids=input_ids,attention_mask=attention_mask)
+            print(outputs.logits)
+            continue
             preds=outputs.logits.argmax(-1)
+            print(input_ids.shape,attention_mask.shape)
+            print(outputs.logits.shape,preds.shape,labels.shape)
             test_preds.append(preds)
             test_labels.append(labels)
+            break
+        
         test_preds=torch.cat(test_preds)
         test_labels=torch.cat(test_labels)
-        print(test_preds,test_labels)
+        print(test_preds.shape,test_labels.shape)
+        #print(test_preds,test_labels)
         precision=accuracy_score(test_labels,test_preds)
         print(f"precision: {precision}")
     #torch.save(model.state_dict(),"../output/model.pth")

@@ -27,7 +27,9 @@ class Reranker:
         docs = [(docs[i][0], scores[i]) for i in range(len(docs))]
         docs = sorted(docs, key = lambda x: x[1], reverse = True)
         docs_id = []
+        doc_score=[]
         for item in docs:
             docs_id.append(item[0])
+            doc_score.append(item[1])
         #print(f"Protential ids:{docs_id}")
-        return docs_id
+        return docs_id,doc_score

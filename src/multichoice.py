@@ -147,33 +147,33 @@ if __name__ == "__main__":
         corpus=category_corpus[cgy]
         
         source_ans={id:corpus[id] for id in corpus.keys() if id in s_id}
-        retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh", corpus=source_ans)
-        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-large")
+        retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh-v1.5", corpus=source_ans)
+        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-v2-m3")
         retrieve_ans= retriever.retrieval(q)
-        rerank_res_ids = reranker.rerank(retrieve_ans, q, k=1)
-        
+        rerank_res_ids,rerank_scores = reranker.rerank(retrieve_ans, q, k=1)
         predicted_id=rerank_res_ids[0]
         
-        truth_answer["answers"].append({
+        info={
             "qid":q_id,
-            "retrieve": predicted_id
-        })
+            "query": q,
+            "category":cgy,
+            "retrieve":gt_res_id,
+            "predicted":predicted_id,
+            "source":str(s_id),
+            "rank_ids":str(rerank_res_ids),
+            "rank_scores":str(rerank_scores)
+        }
         if(predicted_id==gt_res_id):
             correct+=1
+            truth_answer["answers"].append(info)
         else:
-            error_answer.append({
-                "qid":q_id,
-                "query": q,
-                "retrieve":gt_res_id,
-                "predicted":predicted_id,
-                "source":s_id,
-                "rank_ids":rerank_res_ids
-            })
+            error_answer.append(info)
 
         print(f"Current correct:{correct}/{i+1}")
         print(f"Current accuracy:{correct/(i+1)}")
     with open(args.output_path,'w', encoding='utf8') as f:
         json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
     with open(args.error_path, 'w', encoding='utf8') as f:
+        
         json.dump(error_answer, f, ensure_ascii=False,indent=4)
     print(f"Precision: {correct/len(gt)}")

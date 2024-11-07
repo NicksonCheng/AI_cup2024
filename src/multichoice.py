@@ -90,6 +90,8 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
+    parser.add_argument('--retriever',type=str,default="BAAI/bge-large-zh")
+    parser.add_argument('--reranker',type=str,default="BAAI/bge-reranker-large")
     parser.add_argument('--error_path',type=str,default="../output/error_retrieve.json",help="錯誤答案分析")
     parser.add_argument('--batch_size',type=int,default=4)
     parser.add_argument('--epoches',type=int,default=100)
@@ -147,8 +149,8 @@ if __name__ == "__main__":
         corpus=category_corpus[cgy]
         
         source_ans={id:corpus[id] for id in corpus.keys() if id in s_id}
-        retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh-v1.5", corpus=source_ans)
-        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-v2-m3")
+        retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh", corpus=source_ans)
+        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-large")
         retrieve_ans= retriever.retrieval(q)
         rerank_res_ids,rerank_scores = reranker.rerank(retrieve_ans, q, k=1)
         predicted_id=rerank_res_ids[0]

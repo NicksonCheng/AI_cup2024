@@ -159,6 +159,7 @@ if __name__ == "__main__":
                 file.write(f"Question:{q}\n")
                 file.write(f"Right Answer ID: {gt_res_id} Predicted Answer ID: {predicted_id}\n")
                 file.write(f"Rank IDs: {str(rerank_res_ids)}\n")
+                file.write("---------------------------------------\n")
         print(f"Current correct:{correct}/{i+1}")
         print(f"Current accuracy:{correct/(i+1)}")
     print(f"Precision: {correct/len(gt)}")

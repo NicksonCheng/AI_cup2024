@@ -90,6 +90,7 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
+    parser.add_argument('--error_path',type=str,default="../output/error_retrieve.json",help="錯誤答案分析")
     parser.add_argument('--batch_size',type=int,default=4)
     parser.add_argument('--epoches',type=int,default=100)
     parser.add_argument('--gpu',type=int,default=0)
@@ -134,6 +135,8 @@ if __name__ == "__main__":
     correct=0
     qs=qs_ref["questions"]
     gt=gt_ref["ground_truths"]
+    error_answer=[]
+    truth_answer={"answers":[]}
     for i,item in tqdm(enumerate(qs)):
         q_id=item["qid"]
         gt_res_id= next((item["retrieve"] for item in gt if item["qid"]==q_id),None)
@@ -151,15 +154,26 @@ if __name__ == "__main__":
         
         predicted_id=rerank_res_ids[0]
         
+        truth_answer["answers"].append({
+            "qid":q_id,
+            "retrieve": predicted_id
+        })
         if(predicted_id==gt_res_id):
             correct+=1
         else:
-            with open("error.txt","a") as file:
-                file.write(f"q_id:{q_id} category:{cgy} source_id:{str(s_id)}\n")
-                file.write(f"Question:{q}\n")
-                file.write(f"Right Answer ID: {gt_res_id} Predicted Answer ID: {predicted_id}\n")
-                file.write(f"Rank IDs: {str(rerank_res_ids)}\n")
-                file.write("---------------------------------------\n")
+            error_answer.append({
+                "qid":q_id,
+                "query": q,
+                "retrieve":gt_res_id,
+                "predicted":predicted_id,
+                "source":s_id,
+                "rank_ids":rerank_res_ids
+            })
+
         print(f"Current correct:{correct}/{i+1}")
         print(f"Current accuracy:{correct/(i+1)}")
+    with open(args.output_path,'w', encoding='utf8') as f:
+        json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
+    with open(args.error_path, 'w', encoding='utf8') as f:
+        json.dump(error_answer, f, ensure_ascii=False,indent=4)
     print(f"Precision: {correct/len(gt)}")

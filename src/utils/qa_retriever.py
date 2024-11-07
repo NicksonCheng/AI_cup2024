@@ -102,15 +102,16 @@ class TextEmbedding(Embeddings, ABC):
 class Retriever:
     def __init__(self, emb_model_name_or_path=None, corpus=None, device='cuda', lan='zh'):
         self.device = device
-        self.langchain_corpus = [Document(page_content=t) for t in corpus]
+        self.langchain_corpus = [Document(page_content=chunk,metadata={"id":id})  for id,ts in corpus.items() for chunk in ts]
         self.corpus = corpus
         self.lan = lan
         if lan=='zh':
-            tokenized_documents = [jieba.lcut(doc) for doc in corpus]
+            self.tokenized_documents = [(id,jieba.lcut(chunk)) for id,ts in corpus.items() for chunk in ts]
         else:
-            tokenized_documents = [doc.split() for doc in corpus]
-        self.bm25 = BM25Okapi(tokenized_documents)
-
+            self.tokenized_documents = [doc.split() for doc in corpus]
+        self.bm25 = BM25Okapi([tokens for id,tokens in self.tokenized_documents])
+        
+        
         self.emb_model = TextEmbedding(emb_model_name_or_path=emb_model_name_or_path)
         self.db = FAISS.from_documents(self.langchain_corpus, self.emb_model)
 
@@ -118,13 +119,14 @@ class Retriever:
 
         # 此处中文使用jieba分词
         query = jieba.lcut(query)  # 分词
-        res = self.bm25.get_top_n(query, self.corpus, n=n)
-        return res
+        res = self.bm25.get_top_n(query,[chunk for id,ts in self.corpus.items() for chunk in ts], n=n)
+        res_with_id=[(id,chunk) for id,ts in self.corpus.items() for chunk in ts if chunk in res]
+        return res_with_id
 
     def emb_retrieval(self, query, k=10):
 
         search_docs = self.db.similarity_search(query, k=k)
-        res = [doc.page_content for doc in search_docs]
+        res = [(doc.metadata["id"],doc.page_content) for doc in search_docs]
         return res
 
     def retrieval(self, query, methods=None):

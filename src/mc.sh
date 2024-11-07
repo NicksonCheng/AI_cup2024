@@ -1,0 +1,1 @@
+python multichoice.py --question_path ../dataset/preliminary --source_path ../reference --output_path ../output/pred_retrieve.json

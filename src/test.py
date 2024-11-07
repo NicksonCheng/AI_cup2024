@@ -1,31 +1,57 @@
-import torch
-from transformers import BertForSequenceClassification, BertTokenizer
+import openai
+import pinecone
+from langchain_community.document_loaders import PyPDFDirectoryLoader
+from langchain.text_splitter import RecursiveCharacterTextSplitter
+from langchain_community.embeddings.openai import OpenAIEmbeddings
+from langchain_community.vectorstores import Pinecone
+from langchain_community.llms import OpenAI
+from langchain_community.embeddings.sentence_transformer import SentenceTransformerEmbeddings
 
-# Load the model and tokenizer
-model = BertForSequenceClassification.from_pretrained("bert-base-chinese")
-tokenizer = BertTokenizer.from_pretrained("bert-base-chinese")
+#Function to read documents
+def load_docs(directory):
+  loader = PyPDFDirectoryLoader(directory)
+  documents = loader.load()
+  return documents
 
-# Example input data
-batch_size = 2
-chunk_size = 3
-seq_length = 5
+# Passing the directory to the 'load_docs' function
+directory = '../reference/test'
+documents = load_docs(directory)
+len(documents)
 
-# Simulating input_ids and attention_mask
-input_ids = torch.randint(0, 100, (batch_size, chunk_size, seq_length))  # Replace with actual tokenized input
-attention_mask = (input_ids != 0).long()  # Example attention mask
+#This function will split the documents into chunks
+def split_docs(documents, chunk_size=1000, chunk_overlap=20):
+  text_splitter = RecursiveCharacterTextSplitter(chunk_size=chunk_size, chunk_overlap=chunk_overlap)
+  docs = text_splitter.split_documents(documents)
+  return docs
 
-# Reshape input_ids and attention_mask
-input_ids = input_ids.view(-1, seq_length)  # Shape: (batch * chunk, seq_length)
-attention_mask = attention_mask.view(-1, seq_length)  # Shape: (batch * chunk, seq_length)
+docs = split_docs(documents)
+print(len(docs))
 
-# Forward pass
-outputs = model(input_ids=input_ids, attention_mask=attention_mask)
 
-# Obtain logits
-logits = outputs.logits  # Shape: (batch * chunk, num_classes)
-print(logits.shape)
-# Reshape logits back to (batch, chunk, num_classes) if needed
-num_classes = logits.size(-1)
-logits = logits.view(batch_size, chunk_size, num_classes)  # Shape: (batch, chunk, num_classes)
+embeddings = SentenceTransformerEmbeddings(model_name="all-MiniLM-L6-v2")
 
-# Now you can process logits as needed
+query_result = embeddings.embed_query("Hello Buddy")
+#print(len(query_result),query_result)
+
+
+import os
+from pinecone import Pinecone
+pc = Pinecone(api_key="pcsk_3QWaDj_TirpHGJsf63e6WzcY7ZmafYmFv7dZCDYzuw5YZwEYr4NRRbZxiBkBExFqbGJQ1p")
+index = pc.Index("multiple-choise")
+
+# Example of how to add documents and embeddings to the index
+index.upsert_from_documents(documents=docs, embeddings=embeddings)
+
+
+#This function will help us in fetching the top relevent documents from our vector store - Pinecone
+def get_similiar_docs(query, k=2):
+    similar_docs = index.similarity_search(query, k=k)
+    return similar_docs
+
+
+from langchain.chains.question_answering import load_qa_chain
+from langchain import HuggingFaceHub
+
+llm=HuggingFaceHub(repo_id="bigscience/bloom", model_kwargs={"temperature":1e-10})
+
+print(llm)

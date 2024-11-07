@@ -44,6 +44,9 @@ def BM25_retrieve(qs, source, corpus_dict):
     tokenized_query = list(jieba.cut_for_search(qs))  # 將查詢語句進行分詞
     ans = bm25.get_top_n(tokenized_query, list(filtered_corpus), n=1)  # 根據查詢語句檢索，返回最相關的文檔，其中n為可調整項
     a = ans[0]
+    print(a)
+    print(corpus_dict)
+    exit()
     # 找回與最佳匹配文本相對應的檔案名
     res = [key for key, value in corpus_dict.items() if value == a]
     return res[0]  # 回傳檔案名
@@ -63,11 +66,11 @@ if __name__ == "__main__":
     with open(args.question_path, 'rb') as f:
         qs_ref = json.load(f)  # 讀取問題檔案
 
-    source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
-    corpus_dict_insurance = load_data(source_path_insurance)
+    # source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
+    # corpus_dict_insurance = load_data(source_path_insurance)
 
-    source_path_finance = os.path.join(args.source_path, 'finance')  # 設定參考資料路徑
-    corpus_dict_finance = load_data(source_path_finance)
+    # source_path_finance = os.path.join(args.source_path, 'finance')  # 設定參考資料路徑
+    # corpus_dict_finance = load_data(source_path_finance)
 
     with open(os.path.join(args.source_path, 'faq/pid_map_content.json'), 'rb') as f_s:
         key_to_source_dict = json.load(f_s)  # 讀取參考資料文件
@@ -75,12 +78,14 @@ if __name__ == "__main__":
 
     for q_dict in qs_ref['questions']:
         if q_dict['category'] == 'finance':
+            continue
             # 進行檢索
             retrieved = BM25_retrieve(q_dict['query'], q_dict['source'], corpus_dict_finance)
             # 將結果加入字典
             answer_dict['answers'].append({"qid": q_dict['qid'], "retrieve": retrieved})
 
         elif q_dict['category'] == 'insurance':
+            continue
             retrieved = BM25_retrieve(q_dict['query'], q_dict['source'], corpus_dict_insurance)
             answer_dict['answers'].append({"qid": q_dict['qid'], "retrieve": retrieved})
 

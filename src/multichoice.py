@@ -3,6 +3,7 @@ import os
 import argparse
 import torch
 import numpy as np
+from datetime import datetime
 from utils.utils import load_data
 from torch.utils.data import Dataset, DataLoader
 from transformers import AutoTokenizer, AutoModelForMaskedLM, BertForSequenceClassification,Trainer, TrainingArguments
@@ -13,54 +14,6 @@ from tqdm import tqdm
 from utils.qa_retriever import Retriever
 from utils.qa_reranker import Reranker
 os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
-# Function to calculate Precision@1
-def precision_at_1(pred):
-    # Get the highest-scoring prediction for each query
-    preds = pred.predictions.argmax(-1)
-    labels = pred.label_ids
-    # Precision@1 is simply accuracy here because we care only about the top result
-    precision_at_1 = accuracy_score(labels, preds)
-    return {"precision@1": precision_at_1}
-def preprocess_sample(q_data,gt_data,category_data):
-    samples=[]
-    labels=[]
-    for item in q_data:
-        q_id=item["qid"]
-        curr_gt=gt_data[q_id-1]["retrieve"]
-        source =item["source"] 
-        main_question =item["query"]
-        cgy =item["category"]
-        for s in source:
-            lb=1 if s == curr_gt else 0
-            if(cgy=="faq"):
-                qas=category_data[cgy][s]
-                combined_ans = " ".join(
-                    [ans for qa_pair in qas for ans in qa_pair["answers"]]
-                )
-                samples.append((main_question,combined_ans,cgy))
-                labels.append(lb)
-                ## augumentation question
-                # for qa in qas:
-                #     question=qa["question"]
-                #     ans=" ".join(qa["answers"])
-                #     self.samples.append((question,ans,cgy))
-                #     self.labels.append(lb)
-            else:
-                ans=category_data[cgy][str(s)]
-                ans_len=len(ans)
-                pivot=2000
-                if(ans_len>pivot):
-                    parts=ans_len  // pivot 
-                    split_ans=[ans[i * pivot:(i+1) * pivot] for i in range(parts)]
-                    split_ans.append(ans[parts * pivot:])
-                    for sub_ans in split_ans:
-                        samples.append((main_question,sub_ans,cgy))
-                        labels.append(lb)
-                else:
-                    samples.append((main_question,ans,cgy))
-                    labels.append(lb)
-    return samples,labels
-
 def preprocess_faq(key_to_source_dict):
     full_context={}
     for key,source in key_to_source_dict.items():
@@ -90,13 +43,14 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
+    
     parser.add_argument('--retriever',type=str,default="BAAI/bge-large-zh")
     parser.add_argument('--reranker',type=str,default="BAAI/bge-reranker-large")
-    parser.add_argument('--error_path',type=str,default="../output/error_retrieve.json",help="錯誤答案分析")
     parser.add_argument('--batch_size',type=int,default=4)
     parser.add_argument('--epoches',type=int,default=100)
     parser.add_argument('--gpu',type=int,default=0)
     parser.add_argument('--lr',type=float,default=1e-3)
+    parser.add_argument('--pos_rank',action='store_true',default=False)
     args = parser.parse_args()  # 解析參數
 
     answer_dict = {"answers": []}  # 初始化字典
@@ -107,10 +61,10 @@ if __name__ == "__main__":
         gt_ref = json.load(f)
     source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
     
-    corpus_dict_insurance = load_data(source_path_insurance,'insurance.json')
+    corpus_dict_insurance = load_data(source_path_insurance,'insurance_filter.json')
 
     source_path_finance = os.path.join(args.source_path, 'finance')  # 設定參考資料路徑
-    corpus_dict_finance = load_data(source_path_finance,"finance.json")
+    corpus_dict_finance = load_data(source_path_finance,"finance_filter.json")
     with open(os.path.join(args.source_path, 'faq/pid_map_content.json'), 'rb') as f_s:
         key_to_source_dict = json.load(f_s)  # 讀取參考資料文件
         key_to_source_dict = {int(key): value for key, value in key_to_source_dict.items()}
@@ -120,12 +74,13 @@ if __name__ == "__main__":
     
     #samples,labels=preprocess_sample(qs_ref["questions"],gt_ref["ground_truths"],category_data)
     faq_corpus=preprocess_faq(key_to_source_dict)
+
     for id,corpus in faq_corpus.items():
-        faq_corpus[id]=split_chunk(corpus)
+        faq_corpus[id]=split_chunk(corpus,max_len=256,overlap_len=100)
     for id,corpus in corpus_dict_insurance.items():
-        corpus_dict_insurance[id]=split_chunk(corpus)
+        corpus_dict_insurance[id]=split_chunk(corpus,max_len=256,overlap_len=100)
     for id,corpus in corpus_dict_finance.items():
-        corpus_dict_finance[id]=split_chunk(corpus)
+        corpus_dict_finance[id]=split_chunk(corpus,max_len=256,overlap_len=100)
     category_corpus={
         "insurance":corpus_dict_insurance,
         "finance":corpus_dict_finance,
@@ -139,6 +94,11 @@ if __name__ == "__main__":
     gt=gt_ref["ground_truths"]
     error_answer=[]
     truth_answer={"answers":[]}
+    error_cgy={
+        "faq":0,
+        "insurance":0,
+        "finance":0
+    }
     for i,item in tqdm(enumerate(qs)):
         q_id=item["qid"]
         gt_res_id= next((item["retrieve"] for item in gt if item["qid"]==q_id),None)
@@ -150,7 +110,7 @@ if __name__ == "__main__":
         
         source_ans={id:corpus[id] for id in corpus.keys() if id in s_id}
         retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh", corpus=source_ans)
-        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-large")
+        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-large",pos_rank=args.pos_rank)
         retrieve_ans= retriever.retrieval(q)
         rerank_res_ids,rerank_scores = reranker.rerank(retrieve_ans, q, k=1)
         predicted_id=rerank_res_ids[0]
@@ -170,12 +130,18 @@ if __name__ == "__main__":
             truth_answer["answers"].append(info)
         else:
             error_answer.append(info)
+            error_cgy[cgy]+=1
 
         print(f"Current correct:{correct}/{i+1}")
         print(f"Current accuracy:{correct/(i+1)}")
-    with open(args.output_path,'w', encoding='utf8') as f:
+    
+    output_folder=os.path.join(args.output_path,"only_chinese")
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+    with open(os.path.join(args.output_path,output_folder,"pred_retrieve.json"),'w', encoding='utf8') as f:
         json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
-    with open(args.error_path, 'w', encoding='utf8') as f:
-        
+    with open(os.path.join(args.output_path,output_folder,"error_retrieve.json"), 'w', encoding='utf8') as f:
         json.dump(error_answer, f, ensure_ascii=False,indent=4)
     print(f"Precision: {correct/len(gt)}")
+    print(f"Each category error:{str(error_cgy)}")
+        

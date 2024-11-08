@@ -1,0 +1,82 @@
+[
+    {
+        "qid": 4,
+        "query": "本契約內容的變更應經由誰同意並批註？",
+        "category": "insurance",
+        "retrieve": 186,
+        "predicted": 179,
+        "source": "[186, 627, 536, 179, 174, 178]",
+        "rank_ids": "[179, 186, 627, 178]",
+        "rank_scores": "[tensor(0.8195), tensor(0.0782), tensor(0.0007), tensor(0.0003)]"
+    },
+    {
+        "qid": 11,
+        "query": "保單借款的可借金額上限如何決定？",
+        "category": "insurance",
+        "retrieve": 7,
+        "predicted": 141,
+        "source": "[241, 258, 141, 298, 357, 325, 7]",
+        "rank_ids": "[141, 7, 258, 325, 357, 298]",
+        "rank_scores": "[tensor(0.3392), tensor(0.2200), tensor(0.1449), tensor(8.4745e-05), tensor(1.8445e-05), tensor(2.7241e-06)]"
+    },
+    {
+        "qid": 29,
+        "query": "被保險人於本契約有效期間內身故，本公司是否會依本契約約定給付保險金？",
+        "category": "insurance",
+        "retrieve": 578,
+        "predicted": 102,
+        "source": "[527, 256, 102, 578, 524, 236, 431]",
+        "rank_ids": "[102, 431, 524, 256, 236, 527, 578]",
+        "rank_scores": "[tensor(0.2252), tensor(0.1500), tensor(0.0749), tensor(0.0389), tensor(0.0252), tensor(0.0124), tensor(0.0044)]"
+    },
+    {
+        "qid": 50,
+        "query": "要保人若於停止效力之日起六個月內提出復效申請，契約效力從何時開始恢復？",
+        "category": "insurance",
+        "retrieve": 78,
+        "predicted": 555,
+        "source": "[528, 341, 365, 524, 555]",
+        "rank_ids": "[555, 341, 528, 524]",
+        "rank_scores": "[tensor(0.7893), tensor(0.0003), tensor(8.8382e-05), tensor(4.0876e-05)]"
+    },
+    {
+        "qid": 64,
+        "query": "在聯發科2022年第1季的合併財務報表中，有哪幾項專利侵權訴訟被提及，涉及哪些專利號碼？",
+        "category": "finance",
+        "retrieve": 124,
+        "predicted": 706,
+        "source": "[706, 128, 872, 808, 124, 150]",
+        "rank_ids": "[706, 124, 150, 128, 872, 808]",
+        "rank_scores": "[tensor(0.5559), tensor(0.2310), tensor(0.0261), tensor(0.0005), tensor(0.0002), tensor(6.3190e-05)]"
+    },
+    {
+        "qid": 72,
+        "query": "光寶科在2022年第1季的合併財務報告是何時經董事會通過並發布的？",
+        "category": "finance",
+        "retrieve": 204,
+        "predicted": 497,
+        "source": "[442, 497, 932, 204, 561, 92]",
+        "rank_ids": "[497, 204, 92, 442]",
+        "rank_scores": "[tensor(0.4105), tensor(0.2863), tensor(0.0043), tensor(3.1463e-05)]"
+    },
+    {
+        "qid": 82,
+        "query": "研華公司在2022年第3季的合併總損益是多少？",
+        "category": "finance",
+        "retrieve": 831,
+        "predicted": 590,
+        "source": "[590, 679, 373, 188, 838, 831, 33]",
+        "rank_ids": "[590, 831, 679, 188, 838, 33, 373]",
+        "rank_scores": "[tensor(0.2436), tensor(0.1516), tensor(0.1175), tensor(0.1014), tensor(0.0109), tensor(0.0003), tensor(1.7819e-05)]"
+    },
+    {
+        "qid": 99,
+        "query": "中鋼在2022年第3季的綜合損益總額是多少？",
+        "category": "finance",
+        "retrieve": 372,
+        "predicted": 693,
+        "source": "[283, 483, 693, 895, 631, 372]",
+        "rank_ids": "[693, 283, 372, 631, 483]",
+        "rank_scores": "[tensor(0.7899), tensor(0.0299), tensor(0.0253), tensor(0.0103), tensor(0.0007)]"
+    }
+]

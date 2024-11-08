@@ -100,20 +100,26 @@ class TextEmbedding(Embeddings, ABC):
 
 
 class Retriever:
-    def __init__(self, emb_model_name_or_path=None, corpus=None, device='cuda', lan='zh'):
+    def __init__(self,baai_path=None, multi_path=None, corpus=None, device='cuda', lan='zh'):
         self.device = device
         self.langchain_corpus = [Document(page_content=chunk,metadata={"id":id})  for id,ts in corpus.items() for chunk in ts]
         self.corpus = corpus
         self.lan = lan
+        self.multi_path=multi_path
         if lan=='zh':
             self.tokenized_documents = [(id,jieba.lcut(chunk)) for id,ts in corpus.items() for chunk in ts]
         else:
             self.tokenized_documents = [doc.split() for doc in corpus]
         self.bm25 = BM25Okapi([tokens for id,tokens in self.tokenized_documents])
         
+        self.bge_large_model = TextEmbedding(emb_model_name_or_path=baai_path)
+        self.bge_db = FAISS.from_documents(self.langchain_corpus, self.bge_large_model)
+        if(self.multi_path):
+            self.multilingual_large_model=TextEmbedding(emb_model_name_or_path=multi_path,device=self.device)
+            self.multilingual_db=FAISS.from_documents(self.langchain_corpus, self.multilingual_large_model,device=self.device)
         
-        self.emb_model = TextEmbedding(emb_model_name_or_path=emb_model_name_or_path)
-        self.db = FAISS.from_documents(self.langchain_corpus, self.emb_model)
+
+        
 
     def bm25_retrieval(self, query, n=10):
 
@@ -123,25 +129,35 @@ class Retriever:
         res_with_id=[(id,chunk) for id,ts in self.corpus.items() for chunk in ts if chunk in res]
         return res_with_id
 
-    def emb_retrieval(self, query, k=10):
+    def bge_retrieval(self, query, k=10):
 
-        search_docs = self.db.similarity_search(query, k=k)
+        search_docs = self.bge_db.similarity_search(query, k=k)
         res = [(doc.metadata["id"],doc.page_content) for doc in search_docs]
         return res
-
+    def multilingual_retrieval(self, query, k=10):
+        search_docs = self.multilingual_db.similarity_search(query, k=k)
+        res = [(doc.metadata["id"],doc.page_content) for doc in search_docs]
+        return res
     def retrieval(self, query, methods=None):
         if methods is None:
-            methods = ['bm25', 'emb']
+            methods = ['bm25', 'bge_large','multilingual_large']
         search_res = list()
         for method in methods:
             if method == 'bm25':
+                
                 bm25_res = self.bm25_retrieval(query)
                 for item in bm25_res:
                     if item not in search_res:
                         search_res.append(item)
-            elif method == 'emb':
-                emb_res = self.emb_retrieval(query)
-                for item in emb_res:
+            elif method == 'bge_large':
+                
+                bag_res = self.bge_retrieval(query)
+                for item in bag_res:
+                    if item not in search_res:
+                        search_res.append(item)
+            elif method == 'multilingual_large' and self.multi_path:
+                multilingual_res = self.multilingual_retrieval(query)
+                for item in multilingual_res:
                     if item not in search_res:
                         search_res.append(item)
         return search_res

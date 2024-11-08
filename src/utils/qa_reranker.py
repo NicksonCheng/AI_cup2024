@@ -6,11 +6,11 @@ from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 
 class Reranker:
-    def __init__(self, rerank_model_name_or_path, pos_rank=False, device='cuda'):
+    def __init__(self, rerank_model_name_or_path, task, device='cuda'):
         self.rerank_tokenizer = AutoTokenizer.from_pretrained(rerank_model_name_or_path)
         self.rerank_model = AutoModelForSequenceClassification.from_pretrained(rerank_model_name_or_path)\
             .half().to(device).eval()
-        self.pos_rank=pos_rank
+        self.task=task
         self.device = device
         print('successful load rerank model')
 
@@ -37,7 +37,7 @@ class Reranker:
         docs = [(docs[i][0], scores[i]) for i in range(len(docs))]
         docs = sorted(docs, key = lambda x: x[1], reverse = True)
 
-        if(not self.pos_rank):
+        if(self.task != "pos_rank"):
             doc_id=[doc[0] for doc in docs]
             doc_score=[doc[1] for doc in docs]
             return doc_id,doc_score

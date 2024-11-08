@@ -13,7 +13,8 @@ from sklearn.metrics import accuracy_score
 from tqdm import tqdm
 from utils.qa_retriever import Retriever
 from utils.qa_reranker import Reranker
-os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
+from collections import defaultdict
+#os.environ["CUDA_VISIBLE_DEVICES"] = "1,2,3"
 def preprocess_faq(key_to_source_dict):
     full_context={}
     for key,source in key_to_source_dict.items():
@@ -43,28 +44,33 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
-    
-    parser.add_argument('--retriever',type=str,default="BAAI/bge-large-zh")
+    parser.add_argument('--task',type=str,default=["base","only_chinese","pos_rank","baai_1.5","multilingual"])
+    parser.add_argument('--baai_path',type=str,default="BAAI/bge-large-zh")
     parser.add_argument('--reranker',type=str,default="BAAI/bge-reranker-large")
     parser.add_argument('--batch_size',type=int,default=4)
     parser.add_argument('--epoches',type=int,default=100)
-    parser.add_argument('--gpu',type=int,default=0)
     parser.add_argument('--lr',type=float,default=1e-3)
-    parser.add_argument('--pos_rank',action='store_true',default=False)
+    parser.add_argument('--pid',type=int,default=1, required=True,help="which sub_question part used in program")
+    parser.add_argument('--has_ground_truth',action='store_true',default=False)
+    parser.add_argument('--gpu',type=int,default=0)
     args = parser.parse_args()  # 解析參數
-
     answer_dict = {"answers": []}  # 初始化字典
 
+    multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual" else None
+    if(not os.path.exists(args.output_path)):
+        os.mkdir(args.output_path)
     with open(os.path.join(args.question_path,"questions_example.json"), 'rb') as f:
         qs_ref = json.load(f)  # 讀取問題檔案
     with open(os.path.join(args.question_path,"ground_truths_example.json"), 'rb') as f:
         gt_ref = json.load(f)
+
+    insurance_json_path="insurance.json" if args.task == "base" else "insurance_v2.json"
+    finance_json_path="finance.json" if args.task == "base" else "finance_v2.json"
     source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
-    
-    corpus_dict_insurance = load_data(source_path_insurance,'insurance_filter.json')
+    corpus_dict_insurance = load_data(source_path_insurance,insurance_json_path)
 
     source_path_finance = os.path.join(args.source_path, 'finance')  # 設定參考資料路徑
-    corpus_dict_finance = load_data(source_path_finance,"finance_filter.json")
+    corpus_dict_finance = load_data(source_path_finance,finance_json_path)
     with open(os.path.join(args.source_path, 'faq/pid_map_content.json'), 'rb') as f_s:
         key_to_source_dict = json.load(f_s)  # 讀取參考資料文件
         key_to_source_dict = {int(key): value for key, value in key_to_source_dict.items()}
@@ -87,21 +93,31 @@ if __name__ == "__main__":
         "faq":faq_corpus
     }
 
-    # faq_questions=[item for item in qs_ref["questions"] if item["category"]=="insurance"]
-    # gt_faq=[item for item in gt_ref["ground_truths"] if item["category"]=="insurance"]
-    correct=0
+    num_q_partitions=2
+    
     qs=qs_ref["questions"]
     gt=gt_ref["ground_truths"]
+    category_qs=defaultdict(list)
+    current_qs=[]
+    for q in qs:
+        category_qs[q["category"]].append(q)
+    for cgy,q in category_qs.items():
+        each_partitions_elemnts= len(q) // num_q_partitions
+        partition_q= q[args.pid *each_partitions_elemnts: (args.pid + 1) *each_partitions_elemnts]
+        current_qs.extend(partition_q)
+    print(len(current_qs))
+    correct=0
     error_answer=[]
-    truth_answer={"answers":[]}
+    truth_answer=[]
+    total_answer={"answers":[]}
     error_cgy={
         "faq":0,
         "insurance":0,
         "finance":0
     }
-    for i,item in tqdm(enumerate(qs)):
+    for i,item in tqdm(enumerate(current_qs)):
         q_id=item["qid"]
-        gt_res_id= next((item["retrieve"] for item in gt if item["qid"]==q_id),None)
+        
         s_id=item["source"]
         q=item["query"]
         cgy=item["category"]
@@ -109,39 +125,53 @@ if __name__ == "__main__":
         corpus=category_corpus[cgy]
         
         source_ans={id:corpus[id] for id in corpus.keys() if id in s_id}
-        retriever = Retriever(emb_model_name_or_path="BAAI/bge-large-zh", corpus=source_ans)
-        reranker = Reranker(rerank_model_name_or_path="BAAI/bge-reranker-large",pos_rank=args.pos_rank)
+        retriever = Retriever(baai_path="BAAI/bge-reranker-large",multi_path=multi_path, corpus=source_ans,device=f"cuda:{args.gpu}")
+        reranker = Reranker(rerank_model_name_or_path=args.reranker,task=args.task,device=f"cuda:{args.gpu}")
         retrieve_ans= retriever.retrieval(q)
         rerank_res_ids,rerank_scores = reranker.rerank(retrieve_ans, q, k=1)
         predicted_id=rerank_res_ids[0]
         
-        info={
+        output_info={
             "qid":q_id,
-            "query": q,
-            "category":cgy,
-            "retrieve":gt_res_id,
-            "predicted":predicted_id,
-            "source":str(s_id),
-            "rank_ids":str(rerank_res_ids),
-            "rank_scores":str(rerank_scores)
+            "retrieve":predicted_id,
         }
-        if(predicted_id==gt_res_id):
-            correct+=1
-            truth_answer["answers"].append(info)
-        else:
-            error_answer.append(info)
-            error_cgy[cgy]+=1
+        total_answer["answers"].append(output_info)
+        if(args.has_ground_truth):
+            gt_res_id= next((item["retrieve"] for item in gt if item["qid"]==q_id),None)
+            test_info={
+                "qid":q_id,
+                "query": q,
+                "category":cgy,
+                "retrieve":gt_res_id,
+                "predicted":predicted_id,
+                "source":str(s_id),
+                "rank_ids":str(rerank_res_ids),
+                "rank_scores":str(rerank_scores)
+            }
+            if(predicted_id==gt_res_id):
+                correct+=1
+                truth_answer.append(test_info)
+            else:
+                error_answer.append(test_info)
+                error_cgy[cgy]+=1
+            print(f"Current correct:{correct}/{i+1}")
+            print(f"Current accuracy:{correct/(i+1)}")
+        
 
-        print(f"Current correct:{correct}/{i+1}")
-        print(f"Current accuracy:{correct/(i+1)}")
     
-    output_folder=os.path.join(args.output_path,"only_chinese")
+    output_folder=os.path.join(args.output_path,args.task)
     if not os.path.exists(output_folder):
         os.mkdir(output_folder)
-    with open(os.path.join(args.output_path,output_folder,"pred_retrieve.json"),'w', encoding='utf8') as f:
-        json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
-    with open(os.path.join(args.output_path,output_folder,"error_retrieve.json"), 'w', encoding='utf8') as f:
-        json.dump(error_answer, f, ensure_ascii=False,indent=4)
-    print(f"Precision: {correct/len(gt)}")
-    print(f"Each category error:{str(error_cgy)}")
+    output_folder=os.path.join(args.output_path,args.task,str(args.pid)) 
+    if not os.path.exists(output_folder):
+        os.mkdir(output_folder)
+    with open(os.path.join(args.output_path,output_folder,"pred_retrieve.json"), 'w', encoding='utf8') as f:
+        json.dump(total_answer, f, ensure_ascii=False,indent=4)
+    if(args.has_ground_truth):
+        with open(os.path.join(args.output_path,output_folder,"correct_retrieve.json"),'w', encoding='utf8') as f:
+            json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
+        with open(os.path.join(args.output_path,output_folder,"error_retrieve.json"), 'w', encoding='utf8') as f:
+            json.dump(error_answer, f, ensure_ascii=False,indent=4)
+        print(f"Precision: {correct/len(gt)}")
+        print(f"Each category error:{str(error_cgy)}")
         

@@ -1,0 +1,1 @@
+Precision: 0.9466666666666667Each category error:{'faq': 0, 'insurance': 4, 'finance': 4}

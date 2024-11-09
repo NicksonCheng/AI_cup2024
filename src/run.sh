@@ -1,10 +1,19 @@
-python multichoice.py \
-    --question_path ../dataset/preliminary \
-    --source_path ../reference \
-    --output_path ../output \
-    --pid 1 \
-    --task tmp \
-    --has_ground_truth \
-    --gpu 3 \
-    #--baai_path BAAI/bge-large-zh-v1.5 \
-    #--reranker BAAI/bge-reranker-v2-m3
+mkdir -p log/partition
+for pid in {0..9}
+do
+    gpu=$((pid % 4))
+    logfile="log/partition/$(date +"%Y-%m-%d_%H-%M-%S")_$pid.log"
+    nohup python multichoice.py \
+        --question_path ../dataset/preliminary \
+        --source_path ../reference \
+        --output_path ../output \
+        --pid $pid \
+        --partition 10 \
+        --task partition \
+        --has_ground_truth \
+        --gpu $gpu \
+        > "$logfile" 2>&1 &
+        #--baai_path BAAI/bge-large-zh-v1.5 \
+        #--reranker BAAI/bge-reranker-v2-m3
+    echo "Started process with pid=$pid, log file: $logfile"
+done

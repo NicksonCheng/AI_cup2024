@@ -44,7 +44,7 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
-    parser.add_argument('--task',type=str,default=["base","only_chinese","pos_rank","baai_1.5","multilingual"])
+    parser.add_argument('--task',type=str,default=["base(contest)","only_chinese(contest)","pos_rank(contest)","baai_1.5(contest)","multilingual(contest)"])
     parser.add_argument('--baai_path',type=str,default="BAAI/bge-large-zh")
     parser.add_argument('--reranker',type=str,default="BAAI/bge-reranker-large")
     parser.add_argument('--batch_size',type=int,default=4)
@@ -56,8 +56,8 @@ if __name__ == "__main__":
     parser.add_argument('--gpu',type=int,default=0)
     args = parser.parse_args()  # 解析參數
     answer_dict = {"answers": []}  # 初始化字典
-    print(args.pid,args.gpu)
-    multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual" else None
+    print(args.pid,args.gpu,flush=True)
+    multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual(contest)" else None
     if(not os.path.exists(args.output_path)):
         os.mkdir(args.output_path)
     with open(os.path.join(args.question_path,"questions_example.json"), 'rb') as f:
@@ -65,8 +65,8 @@ if __name__ == "__main__":
     with open(os.path.join(args.question_path,"ground_truths_example.json"), 'rb') as f:
         gt_ref = json.load(f)
 
-    insurance_json_path="insurance.json" if args.task == "base" else "insurance_v2.json"
-    finance_json_path="finance.json" if args.task == "base" else "finance_v2.json"
+    insurance_json_path="insurance.json" if args.task == "base(contest)" else "insurance_v2.json"
+    finance_json_path="finance.json" if args.task == "base(contest)" else "finance_v2.json"
     source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
     corpus_dict_insurance = load_data(source_path_insurance,insurance_json_path)
 
@@ -157,8 +157,8 @@ if __name__ == "__main__":
             else:
                 error_answer.append(test_info)
                 error_cgy[cgy]+=1
-            print(f"Current correct:{correct}/{i+1}")
-            print(f"Current accuracy:{correct/(i+1)}")
+            print(f"Current correct:{correct}/{i+1}",flush=True)
+            print(f"Current accuracy:{correct/(i+1)}",flush=True)
         
 
     
@@ -175,6 +175,6 @@ if __name__ == "__main__":
             json.dump(truth_answer, f, ensure_ascii=False, indent=4)  # 儲存檔案，確保格式和非ASCII字符
         with open(os.path.join(args.output_path,output_folder,"error_retrieve.json"), 'w', encoding='utf8') as f:
             json.dump(error_answer, f, ensure_ascii=False,indent=4)
-        print(f"Precision: {correct/len(gt)}")
-        print(f"Each category error:{str(error_cgy)}")
+        print(f"Precision: {correct/len(gt)}",flush=True)
+        print(f"Each category error:{str(error_cgy)}",flush=True)
         

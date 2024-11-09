@@ -44,7 +44,7 @@ if __name__ == "__main__":
     parser.add_argument('--question_path', type=str, required=True, help='讀取發布題目路徑')  # 問題文件的路徑
     parser.add_argument('--source_path', type=str, required=True, help='讀取參考資料路徑')  # 參考資料的路徑
     parser.add_argument('--output_path', type=str, required=True, help='輸出符合參賽格式的答案路徑')  # 答案輸出的路徑
-    parser.add_argument('--task',type=str,default=["base(contest)","only_chinese(contest)","pos_rank(contest)","baai_1.5(contest)","multilingual(contest)"])
+    parser.add_argument('--task',type=str,default=["base[contest]","only_chinese[contest]","pos_rank[contest]","baai_1.5[contest]","multilingual[contest]","summary[contest]"])
     parser.add_argument('--baai_path',type=str,default="BAAI/bge-large-zh")
     parser.add_argument('--reranker',type=str,default="BAAI/bge-reranker-large")
     parser.add_argument('--batch_size',type=int,default=4)
@@ -57,7 +57,7 @@ if __name__ == "__main__":
     args = parser.parse_args()  # 解析參數
     answer_dict = {"answers": []}  # 初始化字典
     print(args.pid,args.gpu,flush=True)
-    multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual(contest)" else None
+    multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual[contest]" else None
     if(not os.path.exists(args.output_path)):
         os.mkdir(args.output_path)
     with open(os.path.join(args.question_path,"questions_example.json"), 'rb') as f:
@@ -65,8 +65,15 @@ if __name__ == "__main__":
     with open(os.path.join(args.question_path,"ground_truths_example.json"), 'rb') as f:
         gt_ref = json.load(f)
 
-    insurance_json_path="insurance.json" if args.task == "base(contest)" else "insurance_v2.json"
-    finance_json_path="finance.json" if args.task == "base(contest)" else "finance_v2.json"
+    if args.task == "base[contest]":
+        insurance_json_path="insurance.json"
+        finance_json_path="finance.json"
+    elif args.task == "summary[contest]":
+        insurance_json_path="insurance_summary.json"
+        finance_json_path="finance_summary.json"
+    else:
+        insurance_json_path="insurance_v2.json"
+        finance_json_path="finance_v2.json"
     source_path_insurance = os.path.join(args.source_path, 'insurance')  # 設定參考資料路徑
     corpus_dict_insurance = load_data(source_path_insurance,insurance_json_path)
 

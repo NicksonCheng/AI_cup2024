@@ -9,7 +9,7 @@ do
         --output_path ../output \
         --pid $pid \
         --partition 10 \
-        --task partition \
+        --task summary[contest] \
         --has_ground_truth \
         --gpu $gpu \
         > "$logfile" 2>&1 &

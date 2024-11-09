@@ -60,10 +60,12 @@ if __name__ == "__main__":
     multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual[contest]" else None
     if(not os.path.exists(args.output_path)):
         os.mkdir(args.output_path)
-    with open(os.path.join(args.question_path,"questions_example.json"), 'rb') as f:
+    with open(os.path.join(args.question_path,"questions_preliminary.json"), 'rb') as f:
         qs_ref = json.load(f)  # 讀取問題檔案
-    with open(os.path.join(args.question_path,"ground_truths_example.json"), 'rb') as f:
-        gt_ref = json.load(f)
+    if(args.has_ground_truth):
+        with open(os.path.join(args.question_path,"ground_truths_example.json"), 'rb') as f:
+            gt_ref = json.load(f)
+        gt=gt_ref["ground_truths"]
 
     if args.task == "base[contest]":
         insurance_json_path="insurance.json"
@@ -105,7 +107,7 @@ if __name__ == "__main__":
 
     ## seperate question dataset into serveral partition and used specific part in program
     qs=qs_ref["questions"]
-    gt=gt_ref["ground_truths"]
+    
     category_qs=defaultdict(list)
     current_qs=[]
     for q in qs:

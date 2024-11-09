@@ -1,18 +1,17 @@
 
 
-mkdir -p "log/summary[contest]"
+mkdir -p "log/only_chinese[contest]"
 for pid in {0..9}
 do
     gpu=$((pid % 4))
-    logfile="log/summary[contest]/$pid.log"
+    logfile="log/only_chinese[contest]/$pid.log"
     nohup python multichoice.py \
-        --question_path ../dataset/preliminary \
+        --question_path ../contest \
         --source_path ../reference \
         --output_path ../output \
         --pid $pid \
         --partition 10 \
-        --task "summary[contest]" \
-        --has_ground_truth \
+        --task "only_chinese[contest]" \
         --gpu $gpu \
         > "$logfile" 2>&1 &
         #--baai_path BAAI/bge-large-zh-v1.5 \

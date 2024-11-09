@@ -69,7 +69,7 @@ if __name__ == "__main__":
         insurance_json_path="insurance.json"
         finance_json_path="finance.json"
     elif args.task == "summary[contest]":
-        insurance_json_path="insurance_summary.json"
+        insurance_json_path="insurance_v2.json"
         finance_json_path="finance_summary.json"
     else:
         insurance_json_path="insurance_v2.json"

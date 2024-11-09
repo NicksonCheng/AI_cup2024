@@ -37,7 +37,7 @@ class Reranker:
         docs = [(docs[i][0], scores[i]) for i in range(len(docs))]
         docs = sorted(docs, key = lambda x: x[1], reverse = True)
 
-        if(self.task != "pos_rank(contest)"):
+        if(self.task != "pos_rank[contest]"):
             doc_id=[doc[0] for doc in docs]
             doc_score=[doc[1] for doc in docs]
             return doc_id,doc_score

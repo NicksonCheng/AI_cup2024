@@ -17,8 +17,9 @@ with open(os.path.join(args.folder,"pred_retrieve.json"),'r') as file:
 
 total=len(gts)
 correct=0
+
 for gt,pred in zip(gts,pred_retrieves):
     if(gt["retrieve"]==pred["retrieve"]):
         correct+=1
 
-print(f"Precision: {correct/total}")
+print(f"{correct}/{total} Precision: {correct/total}")

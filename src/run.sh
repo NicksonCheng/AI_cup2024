@@ -1,15 +1,17 @@
-mkdir -p log/partition
+
+
+mkdir -p "log/only_chinese[contest]"
 for pid in {0..9}
 do
     gpu=$((pid % 4))
-    logfile="log/partition/$(date +"%Y-%m-%d_%H-%M-%S")_$pid.log"
+    logfile="log/only_chinese[contest]/$pid.log"
     nohup python multichoice.py \
         --question_path ../dataset/preliminary \
         --source_path ../reference \
         --output_path ../output \
         --pid $pid \
         --partition 10 \
-        --task summary[contest] \
+        --task "only_chinese[contest]" \
         --has_ground_truth \
         --gpu $gpu \
         > "$logfile" 2>&1 &

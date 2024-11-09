@@ -50,12 +50,13 @@ if __name__ == "__main__":
     parser.add_argument('--batch_size',type=int,default=4)
     parser.add_argument('--epoches',type=int,default=100)
     parser.add_argument('--lr',type=float,default=1e-3)
-    parser.add_argument('--pid',type=int,default=1, required=True,help="which sub_question part used in program")
+    parser.add_argument('--partition',type=int,default=1,help="divide question data into several partition")
+    parser.add_argument('--pid',type=int,default=0, required=True,help="which sub_question part used in program")
     parser.add_argument('--has_ground_truth',action='store_true',default=False)
     parser.add_argument('--gpu',type=int,default=0)
     args = parser.parse_args()  # 解析參數
     answer_dict = {"answers": []}  # 初始化字典
-
+    print(args.pid,args.gpu)
     multi_path="intfloat/multilingual-e5-large" if args.task == "multilingual" else None
     if(not os.path.exists(args.output_path)):
         os.mkdir(args.output_path)
@@ -93,8 +94,9 @@ if __name__ == "__main__":
         "faq":faq_corpus
     }
 
-    num_q_partitions=2
     
+
+    ## seperate question dataset into serveral partition and used specific part in program
     qs=qs_ref["questions"]
     gt=gt_ref["ground_truths"]
     category_qs=defaultdict(list)
@@ -102,10 +104,11 @@ if __name__ == "__main__":
     for q in qs:
         category_qs[q["category"]].append(q)
     for cgy,q in category_qs.items():
-        each_partitions_elemnts= len(q) // num_q_partitions
+        each_partitions_elemnts= len(q) // args.partition
         partition_q= q[args.pid *each_partitions_elemnts: (args.pid + 1) *each_partitions_elemnts]
         current_qs.extend(partition_q)
-    print(len(current_qs))
+
+    
     correct=0
     error_answer=[]
     truth_answer=[]

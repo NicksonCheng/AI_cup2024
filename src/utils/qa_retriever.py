@@ -112,11 +112,12 @@ class Retriever:
             self.tokenized_documents = [doc.split() for doc in corpus]
         self.bm25 = BM25Okapi([tokens for id,tokens in self.tokenized_documents])
         
-        self.bge_large_model = TextEmbedding(emb_model_name_or_path=baai_path)
+        self.bge_large_model = TextEmbedding(emb_model_name_or_path=baai_path,device=self.device)
         self.bge_db = FAISS.from_documents(self.langchain_corpus, self.bge_large_model)
         if(self.multi_path):
+            print("load multilingual large model")
             self.multilingual_large_model=TextEmbedding(emb_model_name_or_path=multi_path,device=self.device)
-            self.multilingual_db=FAISS.from_documents(self.langchain_corpus, self.multilingual_large_model,device=self.device)
+            self.multilingual_db=FAISS.from_documents(self.langchain_corpus, self.multilingual_large_model)
         
 
         

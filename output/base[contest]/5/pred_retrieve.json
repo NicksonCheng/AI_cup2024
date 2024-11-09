@@ -1,0 +1,64 @@
+{
+    "answers": [
+        {
+            "qid": 26,
+            "retrieve": 147
+        },
+        {
+            "qid": 27,
+            "retrieve": 171
+        },
+        {
+            "qid": 28,
+            "retrieve": 298
+        },
+        {
+            "qid": 29,
+            "retrieve": 256
+        },
+        {
+            "qid": 30,
+            "retrieve": 327
+        },
+        {
+            "qid": 76,
+            "retrieve": 211
+        },
+        {
+            "qid": 77,
+            "retrieve": 843
+        },
+        {
+            "qid": 78,
+            "retrieve": 119
+        },
+        {
+            "qid": 79,
+            "retrieve": 65
+        },
+        {
+            "qid": 80,
+            "retrieve": 837
+        },
+        {
+            "qid": 126,
+            "retrieve": 1
+        },
+        {
+            "qid": 127,
+            "retrieve": 365
+        },
+        {
+            "qid": 128,
+            "retrieve": 436
+        },
+        {
+            "qid": 129,
+            "retrieve": 283
+        },
+        {
+            "qid": 130,
+            "retrieve": 5
+        }
+    ]
+}

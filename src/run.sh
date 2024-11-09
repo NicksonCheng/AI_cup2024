@@ -1,17 +1,17 @@
 
 
-mkdir -p "log/only_chinese[contest]"
+mkdir -p "log/summary[contest]"
 for pid in {0..9}
 do
     gpu=$((pid % 4))
-    logfile="log/only_chinese[contest]/$pid.log"
+    logfile="log/summary[contest]/$pid.log"
     nohup python multichoice.py \
         --question_path ../dataset/preliminary \
         --source_path ../reference \
         --output_path ../output \
         --pid $pid \
         --partition 10 \
-        --task "only_chinese[contest]" \
+        --task "summary[contest]" \
         --has_ground_truth \
         --gpu $gpu \
         > "$logfile" 2>&1 &

@@ -11,8 +11,8 @@ args = parser.parse_args()  # 解析參數
 
 total_answers={"answers":[]}
 
-for json_file in os.listdir(args.folder):
-    with open(os.path.join(args.folder,json_file,"pred_retrieve.json"),'r') as file:
+for partition_folder in os.listdir(args.folder):
+    with open(os.path.join(args.folder,partition_folder,"pred_retrieve.json"),'r') as file:
         part_ans=json.load(file)
         
         total_answers["answers"].extend(part_ans["answers"])

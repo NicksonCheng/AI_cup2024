@@ -141,7 +141,7 @@ class Retriever:
         return res
     def retrieval(self, query, methods=None):
         if methods is None:
-            methods = ['bm25', 'bge_large','multilingual_large']
+            methods = ['bm25','multilingual_large']
         search_res = list()
         for method in methods:
             if method == 'bm25':

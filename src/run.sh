@@ -1,17 +1,17 @@
 
 
-mkdir -p "log/baai_1.5[contest]"
+mkdir -p "log/multilingual_bm25"
 for pid in {0..9}
 do
     gpu=$((pid % 4))
-    logfile="log/baai_1.5[contest]/$pid.log"
+    logfile="log/multilingual_bm25/$pid.log"
     nohup python multichoice.py \
-        --question_path ../contest \
+        --question_path ../dataset/preliminary \
         --source_path ../reference \
         --output_path ../output \
         --pid $pid \
         --partition 10 \
-        --task "baai_1.5[contest]" \
+        --task "multilingual_bm25" \
         --gpu $gpu \
         > "$logfile" 2>&1 &
         #--baai_path BAAI/bge-large-zh-v1.5 \

@@ -2,6 +2,12 @@
 This project is for AIcup RAG and LLM in financial Q&A contest
 
 ## How to Run the code
+### enviroments setting up 
+⚠️ Please install anaconda3 before you execute this code
+```
+conda env create -f aicup.yml
+```
+### execute
 ```
 bash run.sh
 ```
